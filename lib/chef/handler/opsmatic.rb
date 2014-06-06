@@ -72,6 +72,11 @@ class Chef
         http.read_timeout = 2
         http.use_ssl = (url.scheme == 'https')
 
+        if not @config[:ssl_peer_verify]
+          # TODO: need to work out how to correctly find CA's on all platforms
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
+
         request = Net::HTTP::Post.new(url.request_uri)
         request["Content-Type"] = "application/json"
         request.body = [event].to_json
