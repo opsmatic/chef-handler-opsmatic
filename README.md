@@ -5,7 +5,7 @@ The chef-handler-opsmatic gem is a Chef report and exception handler
 ## Usage
 
 The easiest way to install this handler in your Chef environment is with the `handler`
-recipe in the [chef-opsmatic](https://github.com/opsmatic/chef-opsmatic) cookbook.
+recipe in the [opsmatic-cookbook](https://github.com/opsmatic/opsmatic-cookbook) cookbook.
 
 ## Contributing
 
