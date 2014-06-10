@@ -34,8 +34,8 @@ class Chef
           :summary => summary,
           :data => {
             :status      => run_status.success? ? "success" : "failure",
-            :start_time  => run_status.start_time,
-            :end_time    => run_status.end_time,
+            :start_time  => run_status.start_time.to_i,
+            :end_time    => run_status.end_time.to_i,
             :duration    => run_status.elapsed_time,
             :updated_resources => []
           }
