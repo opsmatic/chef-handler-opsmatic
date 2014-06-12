@@ -56,7 +56,8 @@ class Chef
 
         # if there's an exception include details in event
         if !run_status.exception.nil? 
-          opsmatic_event[:data][:exception] = run_status.formatted_exception
+          clean_exception = run_status.formatted_exception.encode('UTF-8', {:invalid => :replace, :undef => :replace, :replace => '?'})
+          opsmatic_event[:data][:exception] = clean_exception
         end
 
         submit opsmatic_event
