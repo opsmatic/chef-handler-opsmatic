@@ -27,7 +27,7 @@ class Chef
 
         opsmatic_event = {
           :timestamp => run_status.end_time.to_i,
-          :source => 'integration',
+          :source => 'chef_raw',
           :subject_type => 'hostname',
           :subject => node.fqdn,
           :type => 'cm/chef',
