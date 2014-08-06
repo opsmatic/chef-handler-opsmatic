@@ -80,7 +80,7 @@ class Chef
 
         request = Net::HTTP::Post.new(url.request_uri)
         request["Content-Type"] = "application/json"
-        request.body = [event].to_json
+        request.body = event.to_json
 
         begin
           response = http.request(request)
