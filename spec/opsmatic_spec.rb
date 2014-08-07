@@ -4,7 +4,7 @@ require 'pp'
 
 describe "Chef::Handler::Opsmatic" do
   before(:all) do
-    COLLECTOR_URL = "http://api.opsmatic.com/webhooks/events"
+    COLLECTOR_URL = "http://api.opsmatic.com/webhooks/events/chef"
     INTEGRATION_TOKEN = "xxxxx-yyyyy"
     HOSTNAME = "foo.example.com"
 
