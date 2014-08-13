@@ -87,7 +87,7 @@ class Chef
 
         return unless File.directory?(@config[:agent_dir])
         begin
-          data_dir = "#{@config[:agent_dir]}/files.d"
+          data_dir = "#{@config[:agent_dir]}/external.d"
           if not File.directory?(data_dir)
             Dir.mkdir(data_dir)
           end
@@ -96,7 +96,7 @@ class Chef
             @watch_files.keys.each do |k|
               watchlist << { "path" => k } 
             end
-            f.write(watchlist.to_json)
+            f.write({ "files" => watchlist }.to_json)
           end
         rescue Exception => msg
           Chef::Log.warn("Unable to save opsmatic agent file watch list: #{msg}")

@@ -7,7 +7,7 @@ describe "Chef::Handler::Opsmatic" do
     INTEGRATION_TOKEN = "xxxxx-yyyyy"
     HOSTNAME = "foo.example.com"
     AGENT_DIR = "/var/tmp/opsmatic"
-    WATCHLIST_PATH = "files.d/chef_resources.json"
+    WATCHLIST_PATH = "external.d/chef_resources.json"
 
     @handler = Chef::Handler::Opsmatic.new(
       :integration_token => INTEGRATION_TOKEN,
@@ -71,7 +71,7 @@ describe "Chef::Handler::Opsmatic" do
 
     watched_files = {}
     result = JSON.parse(File.read("#{AGENT_DIR}/#{WATCHLIST_PATH}"))
-    result.each do |file|
+    result["files"].each do |file|
       watched_files[file["path"]] = true
     end
 
