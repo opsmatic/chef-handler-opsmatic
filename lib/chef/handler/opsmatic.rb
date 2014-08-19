@@ -74,6 +74,8 @@ class Chef
       # the list to a directory for the opsmatic-agent to consume to hint at interesting
       # files the agent can watch
       def collect_resources(all_resources)
+        return unless File.directory?(@config[:agent_dir])
+
         all_resources.each do |resource|
           case resource
           when Chef::Resource::CookbookFile
@@ -85,7 +87,6 @@ class Chef
           end
         end
 
-        return unless File.directory?(@config[:agent_dir])
         begin
           data_dir = "#{@config[:agent_dir]}/external.d"
           if not File.directory?(data_dir)
