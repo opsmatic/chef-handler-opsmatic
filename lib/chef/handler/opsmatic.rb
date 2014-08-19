@@ -7,6 +7,8 @@ require 'json'
 class Chef
   class Handler
     class Opsmatic < ::Chef::Handler
+      VERSION = "0.0.8"
+
       def initialize(config = {})
         @config = config
         @config[:agent_dir] ||= "/var/db/opsmatic-agent"
@@ -122,6 +124,7 @@ class Chef
 
         request = Net::HTTP::Post.new(url.request_uri)
         request["Content-Type"] = "application/json"
+        request["User-Agent"] = "Opsmatic Chef Handler #{Chef::Handler::Opsmatic::VERSION}"
         request.body = event.to_json
 
         begin
