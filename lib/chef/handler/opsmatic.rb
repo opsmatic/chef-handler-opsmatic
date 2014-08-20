@@ -7,10 +7,15 @@ require 'json'
 class Chef
   class Handler
     class Opsmatic < ::Chef::Handler
+      VERSION = "0.0.9"
+
       def initialize(config = {})
         @config = config
+        @config[:agent_dir] ||= "/var/db/opsmatic-agent"
+        @watch_files = {}
       end
 
+      # prepares a report of the current chef run
       def report
         if @config[:integration_token].nil? || @config[:integration_token].empty?
           Chef::Log.warn("Opsmatic integraton integration_token missing, report handler disabled")
@@ -60,9 +65,48 @@ class Chef
           opsmatic_event[:data][:exception] = clean_exception
         end
 
+        # analyze and collect any potentially monitorable resources
+        collect_resources run_status.all_resources
+
+        # submit our event
         submit opsmatic_event
       end
 
+      # collects up details on file resources managed by chef on the host and writes
+      # the list to a directory for the opsmatic-agent to consume to hint at interesting
+      # files the agent can watch
+      def collect_resources(all_resources)
+        return unless File.directory?(@config[:agent_dir])
+
+        all_resources.each do |resource|
+          case resource
+          when Chef::Resource::CookbookFile
+            @watch_files[resource.path] = true
+          when Chef::Resource::Template
+            @watch_files[resource.path] = true
+          when Chef::Resource::RemoteFile
+            @watch_files[resource.path] = true
+          end
+        end
+
+        begin
+          data_dir = "#{@config[:agent_dir]}/external.d"
+          if not File.directory?(data_dir)
+            Dir.mkdir(data_dir)
+          end
+          File.open("#{data_dir}/chef_resources.json", "w") do |f|
+            watchlist = []
+            @watch_files.keys.each do |k|
+              watchlist << { "path" => k } 
+            end
+            f.write({ "files" => watchlist }.to_json)
+          end
+        rescue Exception => msg
+          Chef::Log.warn("Unable to save opsmatic agent file watch list: #{msg}")
+        end
+      end
+
+      # submit report to the opsmatic collector
       def submit(event) 
         Chef::Log.info("Posting chef run report to Opsmatic")
         
@@ -80,6 +124,7 @@ class Chef
 
         request = Net::HTTP::Post.new(url.request_uri)
         request["Content-Type"] = "application/json"
+        request["User-Agent"] = "Opsmatic Chef Handler #{Chef::Handler::Opsmatic::VERSION}"
         request.body = event.to_json
 
         begin
