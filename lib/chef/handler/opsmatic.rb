@@ -7,7 +7,7 @@ require 'json'
 class Chef
   class Handler
     class Opsmatic < ::Chef::Handler
-      VERSION = "0.0.9"
+      VERSION = "0.0.10"
 
       def initialize(config = {})
         @config = config
@@ -110,7 +110,11 @@ class Chef
       def submit(event) 
         Chef::Log.info("Posting chef run report to Opsmatic")
         
-        url = URI.parse("#{@config[:collector_url]}?token=#{@config[:integration_token]}")
+        url = URI.parse(@config[:collector_url])
+
+        qs = url.query.nil? ? [] : url.query.split("&")
+        qs << "token=#{@config[:integration_token]}"
+        url.query = qs.join("&")
 
         http = Net::HTTP.new(url.host, url.port)
         http.open_timeout = 2
