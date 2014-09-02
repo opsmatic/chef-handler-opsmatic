@@ -116,32 +116,65 @@ class Chef
         qs << "token=#{@config[:integration_token]}"
         url.query = qs.join("&")
 
-        http = Net::HTTP.new(url.host, url.port)
-        http.open_timeout = 2
-        http.read_timeout = 2
-        http.use_ssl = (url.scheme == 'https')
-
-        if not @config[:ssl_peer_verify]
-          # TODO: need to work out how to correctly find CA's on all platforms
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        end
-
-        request = Net::HTTP::Post.new(url.request_uri)
-        request["Content-Type"] = "application/json"
-        request["User-Agent"] = "Opsmatic Chef Handler #{Chef::Handler::Opsmatic::VERSION}"
-        request.body = event.to_json
-
-        begin
-          response = http.request(request)
-          if response.code != "202"
-            Chef::Log.warn("Got a #{response.code} from Opsmatic event service, chef run wasn't recorded")
-            Chef::Log.info(response.body)
+        proxy_uri = ENV['https_proxy'] ? URI.parse(ENV['https_proxy']) : URI('')
+        proxy_uri = URI.parse(ENV['HTTPS_PROXY']) if ENV['HTTPS_PROXY']
+        p_user, p_pass = proxy_uri.userinfo.split(/:/) if proxy_uri.userinfo
+        #uri = URI(url(options))
+        res = Net::HTTP::Proxy(proxy_uri.host, proxy_uri.port, p_user, p_pass).start(url.hostname, url.port, use_ssl: true) do |http|
+          http.open_timeout = 2
+          http.read_timeout = 2
+          
+          if not @config[:ssl_peer_verify]
+            # TODO: need to work out how to correctly find CA's on all platforms
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           end
-        rescue Timeout::Error
-          Chef::Log.warn("Timed out connecting to Opsmatic event service, chef run wasn't recorded")
-        rescue Exception => msg 
-          Chef::Log.warn("An unhandled execption occured while posting event to Opsmatic event service: #{msg}")
+          
+          request = Net::HTTP::Post.new(url.to_s)
+          request["Content-Type"] = "application/json"
+          request["User-Agent"] = "Opsmatic Chef Handler #{Chef::Handler::Opsmatic::VERSION}"
+          request.body = event.to_json
+          
+           begin
+             response = http.request(request)
+             if response.code != "202"
+               Chef::Log.warn("Got a #{response.code} from Opsmatic event service, chef run wasn't recorded")
+               Chef::Log.info(response.body)
+             end
+           rescue Timeout::Error
+             Chef::Log.warn("Timed out connecting to Opsmatic event service, chef run wasn't recorded")
+           rescue Exception => msg
+             Chef::Log.warn("An unhandled execption occured while posting event to Opsmatic event service: #{msg}")
+           end
+
         end
+
+
+        #http = Net::HTTP.new(url.host, url.port)
+        #http.open_timeout = 2
+        #http.read_timeout = 2
+        #http.use_ssl = (url.scheme == 'https')
+
+        #if not @config[:ssl_peer_verify]
+        #  # TODO: need to work out how to correctly find CA's on all platforms
+        #  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        #end
+
+        #request = Net::HTTP::Post.new(url.request_uri)
+        #request["Content-Type"] = "application/json"
+        #request["User-Agent"] = "Opsmatic Chef Handler #{Chef::Handler::Opsmatic::VERSION}"
+        #request.body = event.to_json
+
+        #begin
+        #  response = http.request(request)
+        #  if response.code != "202"
+        #    Chef::Log.warn("Got a #{response.code} from Opsmatic event service, chef run wasn't recorded")
+        #    Chef::Log.info(response.body)
+        #  end
+        #rescue Timeout::Error
+        #  Chef::Log.warn("Timed out connecting to Opsmatic event service, chef run wasn't recorded")
+        #rescue Exception => msg 
+        #  Chef::Log.warn("An unhandled execption occured while posting event to Opsmatic event service: #{msg}")
+        #end
       end
     end
   end
