@@ -7,7 +7,7 @@ require 'json'
 class Chef
   class Handler
     class Opsmatic < ::Chef::Handler
-      VERSION = "0.0.10"
+      VERSION = "0.0.11"
 
       def initialize(config = {})
         @config = config
@@ -35,6 +35,7 @@ class Chef
           :source => 'chef_raw',
           :subject_type => 'hostname',
           :subject => node.fqdn,
+          :category => 'automation',
           :type => 'cm/chef',
           :summary => summary,
           :data => {
