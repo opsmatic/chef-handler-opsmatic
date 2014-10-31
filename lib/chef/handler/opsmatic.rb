@@ -107,8 +107,6 @@ class Chef
         end
       end
 
-      find 
-
       def check_proxy(proxy)
         begin
           proxy_uri = URI.parse(ENV[proxy])
