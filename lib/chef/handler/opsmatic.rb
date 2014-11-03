@@ -4,10 +4,11 @@ require 'net/http'
 require 'uri'
 require 'json'
 
+require 'chef/handler/opsmatic_version'
+
 class Chef
   class Handler
     class Opsmatic < ::Chef::Handler
-      VERSION = "0.0.12"
 
       def initialize(config = {})
         @config = config
