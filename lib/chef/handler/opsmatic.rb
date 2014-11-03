@@ -7,7 +7,7 @@ require 'json'
 class Chef
   class Handler
     class Opsmatic < ::Chef::Handler
-      VERSION = "0.0.11"
+      VERSION = "0.0.12"
 
       def initialize(config = {})
         @config = config
@@ -78,6 +78,10 @@ class Chef
       # files the agent can watch
       def collect_resources(all_resources)
         return unless File.directory?(@config[:agent_dir])
+
+        # if the chef run didn't even make it far enough to report resources
+        # we don't want to do anything
+        return if all_resources.nil? or all_resources.empty?
 
         all_resources.each do |resource|
           case resource
