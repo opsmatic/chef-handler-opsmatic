@@ -108,12 +108,15 @@ class Chef
       end
 
       def check_proxy(proxy)
-        begin
-          proxy_uri = URI.parse(ENV[proxy])
-          return proxy_uri
-        rescue URI::InvalidURIError
-          end
-        return proxy_uri
+      begin
+        proxy_uri = URI.parse(ENV[proxy])
+        if not proxy_uri.host
+          return nil
+        end
+      rescue URI::InvalidURIError
+        return nil
+        end
+      return proxy_uri
       end
 
       # submit report to the opsmatic collector
