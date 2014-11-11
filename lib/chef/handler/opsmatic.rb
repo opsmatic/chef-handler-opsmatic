@@ -112,6 +112,20 @@ class Chef
         end
       end
 
+      def check_proxy(proxy)
+      begin
+        proxy_uri = URI.parse(ENV[proxy])
+        if not proxy_uri.host
+          Chef::Log.warn("#{proxy} set but could not parse URI")
+          return nil
+        end
+      rescue URI::InvalidURIError
+        Chef::Log.warn("#{proxy} set with invalid URI")
+        return nil
+        end
+      return proxy_uri
+      end
+
       # submit report to the opsmatic collector
       def submit(event) 
         Chef::Log.info("Posting chef run report to Opsmatic")
@@ -121,8 +135,20 @@ class Chef
         qs = url.query.nil? ? [] : url.query.split("&")
         qs << "token=#{@config[:integration_token]}"
         url.query = qs.join("&")
+        proxy_uri = nil
 
-        http = Net::HTTP.new(url.host, url.port)
+        %w(HTTPS_PROXY https_proxy HTTP_PROXY http_proxy).each do |proxy|
+          proxy_uri = check_proxy(proxy)
+          break if proxy_uri
+        end
+
+        if proxy_uri
+          p_user, p_pass = proxy_uri.userinfo.split(/:/) if proxy_uri.userinfo
+          http = Net::HTTP.new(url.host, url.port, proxy_uri.host, proxy_uri.port, p_user, p_pass)
+        else
+          http = Net::HTTP.new(url.host, url.port)
+        end
+
         http.open_timeout = 2
         http.read_timeout = 2
         http.use_ssl = (url.scheme == 'https')
