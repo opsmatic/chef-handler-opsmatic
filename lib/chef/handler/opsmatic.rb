@@ -113,17 +113,19 @@ class Chef
       end
 
       def check_proxy(proxy)
-      begin
-        proxy_uri = URI.parse(ENV[proxy])
-        if not proxy_uri.host
-          Chef::Log.warn("#{proxy} set but could not parse URI")
+        proxy_value = ENV[proxy]
+        return if proxy_value.nil? || proxy_value.empty?
+        begin
+          proxy_uri = URI.parse(proxy_value)
+          if not proxy_uri.host
+            Chef::Log.warn("#{proxy} set but could not parse URI")
+            return nil
+          end
+        rescue URI::InvalidURIError
+          Chef::Log.warn("#{proxy} set with invalid URI")
           return nil
         end
-      rescue URI::InvalidURIError
-        Chef::Log.warn("#{proxy} set with invalid URI")
-        return nil
-        end
-      return proxy_uri
+        return proxy_uri
       end
 
       # submit report to the opsmatic collector
