@@ -153,8 +153,18 @@ class Chef
         unless File.exists?(ext_dir)
           FileUtils.mkdir_p(ext_dir)
         end
+
+        begin
+          node_json = Chef::JSONCompat.to_json_pretty(data[:node])
+          hash = JSON.parse(node_json)
+          hash.delete("automatic")
+          file_json = hash.to_json
+        rescue Exception => msg
+          Chef::Log.warn("An unhandled execption while preparing to write node data: #{msg}")
+        end
+
         File.open(File.join(ext_dir, "chef.json"), "w") do |file|
-          file.puts Chef::JSONCompat.to_json_pretty(data[:node])
+          file.puts hash.to_json
         end
       end
     end
