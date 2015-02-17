@@ -164,7 +164,7 @@ class Chef
         end
 
         File.open(File.join(ext_dir, "chef.json"), "w") do |file|
-          file.puts hash.to_json
+          file.puts file_json
         end
       end
     end
