@@ -71,6 +71,9 @@ class Chef
 
         # submit our event
         submit opsmatic_event
+
+        # write the node attributes to a json file for the agent
+        write_attributes
       end
 
       # collects up details on file resources managed by chef on the host and writes
@@ -142,6 +145,16 @@ class Chef
           Chef::Log.warn("Timed out connecting to Opsmatic event service, chef run wasn't recorded")
         rescue Exception => msg 
           Chef::Log.warn("An unhandled execption occured while posting event to Opsmatic event service: #{msg}")
+        end
+      end
+
+      def write_attributes()
+        ext_dir = "#{@config[:agent_dir]}/external/metadata"
+        unless File.exists?(ext_dir)
+          FileUtils.mkdir_p(ext_dir)
+        end
+        File.open(File.join(ext_dir, "chef.json"), "w") do |file|
+          file.puts Chef::JSONCompat.to_json_pretty(data[:node])
         end
       end
     end
