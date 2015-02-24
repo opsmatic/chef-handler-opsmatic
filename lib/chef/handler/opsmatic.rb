@@ -149,7 +149,7 @@ class Chef
       end
 
       def write_attributes()
-        ext_dir = "#{@config[:agent_dir]}/external/metadata"
+        ext_dir = "#{@config[:agent_dir]}/user_data/metadata"
         unless File.exists?(ext_dir)
           FileUtils.mkdir_p(ext_dir)
         end
@@ -161,10 +161,17 @@ class Chef
           file_json = hash.to_json
         rescue Exception => msg
           Chef::Log.warn("An unhandled execption while preparing to write node data: #{msg}")
+          return
         end
 
-        File.open(File.join(ext_dir, "chef.json"), "w") do |file|
-          file.puts file_json
+        begin
+          filename = File.join(ext_dir, "chef.json")
+          File.open(filename, "w") do |file|
+            file.puts file_json
+          end
+        rescue Exception => msg
+          Chef::Log.warn("An unhandled execption while writing to #{filename}: #{msg}")
+          return
         end
       end
     end
