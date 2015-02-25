@@ -165,7 +165,7 @@ class Chef
         end
 
         begin
-          filename = File.join(ext_dir, "chef.json")
+          filename = File.join(ext_dir, "chef_attributes.json")
           File.open(filename, "w") do |file|
             file.puts file_json
           end
