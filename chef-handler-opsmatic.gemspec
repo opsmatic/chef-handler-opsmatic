@@ -6,7 +6,7 @@ require 'chef/handler/opsmatic_version'
 Gem::Specification.new do |spec|
   spec.name          = "chef-handler-opsmatic"
   spec.version       = Chef::Handler::Opsmatic::VERSION
-  spec.authors       = ["Marcus Barczak"]
+  spec.authors       = ["Opsmatic Engineering"]
   spec.email         = ["support@opsmatic.com"]
   spec.summary       = %q{Chef report handler for sending run detail information to Opsmatic}
   spec.description   = %q{Chef report handler for sending run detail information to Opsmatic}
