@@ -191,6 +191,7 @@ class Chef
           node_json = Chef::JSONCompat.to_json_pretty(data[:node])
           hash = JSON.parse(node_json)
           hash.delete("automatic")
+          hash["opsmatic_event_category"] = "automation"
           file_json = hash.to_json
         rescue Exception => msg
           Chef::Log.warn("An unhandled execption while preparing to write node data: #{msg}")
