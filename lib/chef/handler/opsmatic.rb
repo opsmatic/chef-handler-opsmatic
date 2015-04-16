@@ -34,11 +34,12 @@ class Chef
         opsmatic_event = {
           :timestamp => run_status.end_time.to_i,
           :source => 'chef_raw',
-          :subject_type => 'hostname',
-          :subject => node.fqdn,
           :category => 'automation',
           :type => 'cm/chef',
           :summary => summary,
+          :scopes => {
+            :hostname => node.fqdn
+          },
           :data => {
             :status      => run_status.success? ? "success" : "failure",
             :start_time  => run_status.start_time.to_i,
