@@ -74,8 +74,8 @@ class Chef
         # submit our event
         submit opsmatic_event
 
-        # write the node attributes to a json file for the agent
-        write_attributes
+        # write the node attributes and cookbook versions to json files for the agent
+        write_metadata
       end
 
       # collects up details on file resources managed by chef on the host and writes
@@ -182,7 +182,7 @@ class Chef
         end
       end
 
-      def write_attributes()
+      def write_metadata()
         ext_dir = "#{@config[:agent_dir]}/user_data/metadata"
         unless File.exists?(ext_dir)
           FileUtils.mkdir_p(ext_dir)
@@ -190,10 +190,10 @@ class Chef
 
         begin
           node_json = Chef::JSONCompat.to_json_pretty(data[:node])
-          hash = JSON.parse(node_json)
-          hash.delete("automatic")
-          hash["opsmatic_event_category"] = "automation"
-          file_json = hash.to_json
+          node_hash = JSON.parse(node_json)
+          node_hash.delete("automatic")
+          node_hash["opsmatic_event_category"] = "automation"
+          attribute_json = node_hash.to_json
         rescue Exception => msg
           Chef::Log.warn("An unhandled execption while preparing to write node data: #{msg}")
           return
@@ -202,12 +202,34 @@ class Chef
         begin
           filename = File.join(ext_dir, "chef_attributes.json")
           File.open(filename, "w") do |file|
-            file.puts file_json
+            file.puts attribute_json
           end
         rescue Exception => msg
           Chef::Log.warn("An unhandled execption while writing to #{filename}: #{msg}")
           return
         end
+
+        begin
+          cookbook_hash = {}
+          run_context.cookbook_collection.keys.each do |name|
+            cookbook_hash[name] = run_context.cookbook_collection[name].version
+          end
+          cookbook_hash["opsmatic_event_category"] = "automation"
+        rescue Exception => msg
+          Chef::Log.warn("An unhandled execption while preparing to write cookbook data: #{msg}")
+          return
+        end
+
+        begin
+          filename = File.join(ext_dir, "chef_cookbooks.json")
+          File.open(filename, "w") do |file|
+            file.puts cookbook_hash.to_json
+          end
+        rescue Exception => msg
+          Chef::Log.warn("An unhandled execption while writing to #{filename}: #{msg}")
+          return
+        end
+
       end
     end
   end
