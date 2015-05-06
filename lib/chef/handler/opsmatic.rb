@@ -90,6 +90,8 @@ class Chef
 
         all_resources.each do |resource|
           case resource
+          when Chef::Resource::File
+            @watch_files[resource.path] = true
           when Chef::Resource::CookbookFile
             @watch_files[resource.path] = true
           when Chef::Resource::Template
