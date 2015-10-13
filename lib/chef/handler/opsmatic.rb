@@ -63,7 +63,7 @@ class Chef
         end
 
         # if there's an exception include details in event
-        if !run_status.exception.nil?
+        if !run_status.exception.nil? 
           clean_exception = run_status.formatted_exception.encode('UTF-8', {:invalid => :replace, :undef => :replace, :replace => '?'})
           opsmatic_event[:data][:exception] = clean_exception
         end
@@ -109,7 +109,7 @@ class Chef
           File.open("#{data_dir}/chef_resources.json", "w") do |f|
             watchlist = []
             @watch_files.keys.each do |k|
-              watchlist << { "path" => k }
+              watchlist << { "path" => k } 
             end
             f.write({ "files" => watchlist }.to_json)
           end
@@ -135,9 +135,9 @@ class Chef
       end
 
       # submit report to the opsmatic collector
-      def submit(event)
+      def submit(event) 
         Chef::Log.info("Posting chef run report to Opsmatic")
-
+        
         url = URI.parse(@config[:collector_url])
 
         qs = url.query.nil? ? [] : url.query.split("&")
@@ -157,8 +157,8 @@ class Chef
           http = Net::HTTP.new(url.host, url.port)
         end
 
-        http.open_timeout = 5
-        http.read_timeout = 20
+        http.open_timeout = 2
+        http.read_timeout = 2
         http.use_ssl = (url.scheme == 'https')
 
         if not @config[:ssl_peer_verify]
@@ -179,7 +179,7 @@ class Chef
           end
         rescue Timeout::Error
           Chef::Log.warn("Timed out connecting to Opsmatic event service, chef run wasn't recorded")
-        rescue Exception => msg
+        rescue Exception => msg 
           Chef::Log.warn("An unhandled execption occured while posting event to Opsmatic event service: #{msg}")
         end
       end
