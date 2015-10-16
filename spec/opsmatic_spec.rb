@@ -12,7 +12,8 @@ describe "Chef::Handler::Opsmatic" do
     @handler = Chef::Handler::Opsmatic.new(
       :integration_token => INTEGRATION_TOKEN,
       :collector_url => COLLECTOR_URL,
-      :agent_dir => "/var/tmp/opsmatic"
+      :agent_dir => "/var/tmp/opsmatic",
+      :timeout => "10"
     )
 
     @node = Chef::Node.build(HOSTNAME)
