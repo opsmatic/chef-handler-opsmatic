@@ -13,6 +13,11 @@ recipe in the [opsmatic-cookbook](https://github.com/opsmatic/opsmatic-cookbook)
 * adds support for generating a list of chef managed files for the Opsmatic agent to watch for changes
 * adds sending chef-handler-opsmatic version in the user-agent string
 
+## Releasing
+
+1. Use `gem push` to log in to rubygems.org as the `opsmatic` account
+2. Run `rake release` in this repository to push to rubygems.org
+
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/chef-handler-opsmatic/fork )
